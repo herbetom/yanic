@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
+	"os"
 
 	"github.com/influxdata/influxdb1-client/models"
 	client "github.com/influxdata/influxdb1-client/v2"
@@ -154,6 +155,36 @@ func TestPassword(t *testing.T) {
 	// Test no password
 	assert.Equal("", Config(map[string]interface{}{
 		"address":  "http://localhost",
+	}).Password())
+
+	// Test password from file with password parameter
+	assert.Equal("Extr3MePAssWORDfromFiLE", Config(map[string]interface{}{
+		"password": "",
+		"password_file": "testdata/password.txt",
+	}).Password())
+
+	// Test password from file with value set to password parameter, to test priority of fields
+	assert.Equal("Extr3MePAssWORDfromFiLE", Config(map[string]interface{}{
+		"password": "NotTheFilePassword",
+		"password_file": "testdata/password.txt",
+	}).Password())
+
+	// Test password from file wtihtout defining password parameter
+	assert.Equal("Extr3MePAssWORDfromFiLE", Config(map[string]interface{}{
+		"password_file": "testdata/password.txt",
+	}).Password())
+
+	// Test password from file with line breaks
+	assert.Equal("EXTREMLYDIFFERENTPASSWORD", Config(map[string]interface{}{
+		"password_file": "testdata/password-with-whitepaces.txt",
+	}).Password())
+
+	// Test with environment variable in password_file path
+	os.Setenv("CREDENTIALS_DIRECTORY", "testdata")
+	defer os.Unsetenv("CREDENTIALS_DIRECTORY")
+
+	assert.Equal("Extr3MePAssWORDfromFiLE", Config(map[string]interface{}{
+		"password_file": "${CREDENTIALS_DIRECTORY}/password.txt",
 	}).Password())
 
 }
