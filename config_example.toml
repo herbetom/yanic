@@ -208,6 +208,8 @@ address  = "http://localhost:8086"
 database = "ffhb"
 #username = ""
 #password = ""
+# you can also store the password in a file and even use environment variables for the path. For example with systemd credentials.
+#password_file = "${CREDENTIALS_DIRECTORY}/infux_password"
 #insecure_skip_verify = true
 
 # Tagging of the data (optional)
