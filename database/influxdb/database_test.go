@@ -136,3 +136,44 @@ func TestAddPointWithValidCharacters(t *testing.T) {
 	assert.NotNil(tags)
 	assert.Equal(tags["owner"], "📶this owner uses only\u0020valid chars🛜")
 }
+
+func TestPassword(t *testing.T) {
+	assert := assert.New(t)
+
+	// Test clear text password
+	assert.Equal("testpassword", Config(map[string]interface{}{
+		"password": "testpassword",
+	}).Password())
+
+
+	// Test empty text password
+	assert.Equal("", Config(map[string]interface{}{
+		"password": "",
+	}).Password())
+
+	// Test no password
+	assert.Equal("", Config(map[string]interface{}{
+		"address":  "http://localhost",
+	}).Password())
+
+}
+
+func TestUsername(t *testing.T) {
+	assert := assert.New(t)
+
+	// Testing username set
+	assert.Equal("usernAme", Config(map[string]interface{}{
+		"username": "usernAme",
+	}).Username())
+
+	// Test empty username
+	assert.Equal("", Config(map[string]interface{}{
+		"username": "",
+	}).Username())
+
+	// Test no username
+	assert.Equal("", Config(map[string]interface{}{
+		"address":  "http://localhost",
+	}).Username())
+
+}
