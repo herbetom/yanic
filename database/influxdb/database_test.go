@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
+	"os"
 
 	"github.com/influxdata/influxdb1-client/models"
 	client "github.com/influxdata/influxdb1-client/v2"
@@ -145,6 +146,10 @@ func TestPassword(t *testing.T) {
 		"password": "testpassword",
 	}).Password())
 
+	// Test with password not equal
+	assert.NotEqual("testpassword", Config(map[string]interface{}{
+		"password": "testpa33woru",
+	}).Password())
 
 	// Test empty text password
 	assert.Equal("", Config(map[string]interface{}{
@@ -154,6 +159,54 @@ func TestPassword(t *testing.T) {
 	// Test no password
 	assert.Equal("", Config(map[string]interface{}{
 		"address":  "http://localhost",
+	}).Password())
+
+	// Test password from file with password parameter
+	assert.Equal("Extr3MePAssWORDfromFiLE", Config(map[string]interface{}{
+		"password": "",
+		"password_file": "testdata/password.txt",
+	}).Password())
+
+	// Test password from file with value set to password parameter, to test priority of fields
+	assert.Equal("Extr3MePAssWORDfromFiLE", Config(map[string]interface{}{
+		"password": "NotTheFilePassword",
+		"password_file": "testdata/password.txt",
+	}).Password())
+
+	// Test password from file without defining password parameter
+	assert.Equal("Extr3MePAssWORDfromFiLE", Config(map[string]interface{}{
+		"password_file": "testdata/password.txt",
+	}).Password())
+
+	// Test not equal password from file without defining password parameter
+	assert.NotEqual("SOMETHING_DIFFeReNT", Config(map[string]interface{}{
+		"password_file": "testdata/password.txt",
+	}).Password())
+
+	// Test password from file with line breaks
+	assert.Equal("EXTREMLYDIFFERENTPASSWORD", Config(map[string]interface{}{
+		"password_file": "testdata/password-with-whitepaces.txt",
+	}).Password())
+
+	// Test not equal password from file with line breaks
+	assert.NotEqual("THIS_IS_NOT_THE_SAME", Config(map[string]interface{}{
+		"password_file": "testdata/password-with-whitepaces.txt",
+	}).Password())
+
+	// Test with environment variable in password_file path
+	if err := os.Setenv("CREDENTIALS_DIRECTORY", "testdata"); err != nil {
+		t.Fatalf("os.Setenv failed: %v", err)
+	}
+	defer func() {
+		if err := os.Unsetenv("CREDENTIALS_DIRECTORY"); err != nil {
+			t.Logf("failed to unset CREDENTIALS_DIRECTORY: %v", err)
+		}
+	}()
+	assert.Equal("Extr3MePAssWORDfromFiLE", Config(map[string]interface{}{
+		"password_file": "${CREDENTIALS_DIRECTORY}/password.txt",
+	}).Password())
+	assert.NotEqual("TEST_FROM_FILE_NOT_EQUAL", Config(map[string]interface{}{
+		"password_file": "${CREDENTIALS_DIRECTORY}/password.txt",
 	}).Password())
 
 }

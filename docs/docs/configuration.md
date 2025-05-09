@@ -370,9 +370,10 @@ address  = "http://localhost:8086" # (1)
 database = "ffhb" # (2)
 username = "" # (3)
 password = "" # (4)
-# insecure_skip_verify = true (5)
+# password_file = "${CREDENTIALS_DIRECTORY}/influx_password" (5)
+# insecure_skip_verify = true (6)
 
-[database.connection.influxdb.tags] # (6)
+[database.connection.influxdb.tags] # (7)
 tagname1 = "tagvalue 1"
 system   = "productive"
 site     = "ffhb"
@@ -382,8 +383,9 @@ site     = "ffhb"
 2.  Database on which the measurement should be stored.
 3.  Username to authenticate on InfluxDB
 4.  Password to authenticate on InfluxDB.
-5.  Skip insecure verify for self-signed certificates.
-6.  You could set manuelle tags with inserting into a influxdb.
+5.  As an alternative to the password within the config you can als point to a password_file (even with enviroment variables in the file path).
+6.  Skip insecure verify for self-signed certificates.
+7.  You could set manuelle tags with inserting into a influxdb.
 
     Useful if you want to identify the yanic instance when you use multiple own on the same influxdb (e.g. multisites).
 

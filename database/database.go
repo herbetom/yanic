@@ -1,7 +1,9 @@
 package database
 
 import (
+	"strings"
 	"time"
+	"os"
 
 	"github.com/FreifunkBremen/yanic/runtime"
 )
@@ -32,4 +34,17 @@ var Adapters = map[string]Connect{}
 
 func RegisterAdapter(name string, n Connect) {
 	Adapters[name] = n
+}
+
+func LoadCredentialFromFile(filename string) string {
+	// Expand environment variables in the password file path. This for example enables the use of systemd credentials
+	expandedPath := os.ExpandEnv(filename)
+
+	file, err := os.ReadFile(expandedPath)
+	if err != nil {
+		panic(err)
+	}
+
+	// Remove all leading and trailing white spaces from the password and return it
+	return strings.TrimSpace(string(file))
 }

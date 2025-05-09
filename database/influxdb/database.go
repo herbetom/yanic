@@ -48,6 +48,12 @@ func (c Config) Username() string {
 	return ""
 }
 func (c Config) Password() string {
+	// If the password_file option is set and not empty, read the password from the file
+	if val, ok := c["password_file"]; ok {
+		if val.(string) != "" {
+			return database.LoadCredentialFromFile(val.(string))
+		}
+	}
 	if val, ok := c["password"]; ok {
 		return val.(string)
 	}
