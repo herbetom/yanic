@@ -42,10 +42,16 @@ func (c Config) Database() string {
 	return c["database"].(string)
 }
 func (c Config) Username() string {
-	return c["username"].(string)
+	if val, ok := c["username"]; ok {
+		return val.(string)
+	}
+	return ""
 }
 func (c Config) Password() string {
-	return c["password"].(string)
+	if val, ok := c["password"]; ok {
+		return val.(string)
+	}
+	return ""
 }
 func (c Config) InsecureSkipVerify() bool {
 	if d, ok := c["insecure_skip_verify"]; ok {

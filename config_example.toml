@@ -206,8 +206,8 @@ delete_interval = "1h"
 enable   = false
 address  = "http://localhost:8086"
 database = "ffhb"
-username = ""
-password = ""
+#username = ""
+#password = ""
 #insecure_skip_verify = true
 
 # Tagging of the data (optional)
