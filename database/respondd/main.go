@@ -49,39 +49,64 @@ func Connect(configuration map[string]interface{}) (database.Connection, error) 
 }
 
 func (conn *Connection) InsertNode(node *runtime.Node) {
-	res := &data.ResponseData{
-		Nodeinfo:   node.Nodeinfo,
-		Statistics: node.Statistics,
-		Neighbours: node.Neighbours,
-	}
 
-	writer := bufio.NewWriterSize(conn.conn, 16384)
+	sendData := func(data interface{}) error {
+		writer := bufio.NewWriterSize(conn.conn, 8192)
 
-	flater, err := flate.NewWriter(writer, flate.BestCompression)
-	if err != nil {
-		log.Errorf("[database-yanic] could not create flater: %s", err)
-		return
-	}
-	defer flater.Close()
-	err = json.NewEncoder(flater).Encode(res)
-	if err != nil {
-		nodeid := "unknown"
-		if node.Nodeinfo != nil && node.Nodeinfo.NodeID != "" {
-			nodeid = node.Nodeinfo.NodeID
+		flater, err := flate.NewWriter(writer, flate.BestCompression)
+		if err != nil {
+			log.Errorf("[database-yanic] could not create flater: %s", err)
+			return err
 		}
-		log.WithField("node_id", nodeid).Errorf("[database-yanic] could not encode node: %s", err)
-		return
-	}
-	err = flater.Flush()
-	if err != nil {
-		log.Errorf("[database-yanic] could not compress: %s", err)
-	}
-	err = writer.Flush()
-	if err != nil {
+		defer flater.Close()
+		err = json.NewEncoder(flater).Encode(data)
+		if err != nil {
+			nodeid := "unknown"
+			if node.Nodeinfo != nil && node.Nodeinfo.NodeID != "" {
+				nodeid = node.Nodeinfo.NodeID
+			}
+			log.WithField("node_id", nodeid).Errorf("[database-yanic] could not encode node: %s", err)
+			return err
+		}
+		err = flater.Flush()
+		if err != nil {
+			log.Errorf("[database-yanic] could not compress: %s", err)
+			return err
+		}
+		err = writer.Flush()
+		if err != nil {
+			log.Errorf("[database-yanic] could not send: %s", err)
 
-		log.Errorf("[database-yanic] could not send: %s", res)
-		log.Errorf("[database-yanic] could not send: %s", err)
+			return err
+		}
+
+		return nil
 	}
+
+	// Send Nodeinfo
+    if node.Nodeinfo != nil {
+        err := sendData(&data.ResponseData{Nodeinfo: node.Nodeinfo})
+        if err != nil {
+            return
+        }
+    }
+
+    // Send Statistics
+    if node.Statistics != nil {
+        err := sendData(&data.ResponseData{Statistics: node.Statistics})
+        if err != nil {
+            return
+        }
+    }
+
+    // Send Neighbours
+    if node.Neighbours != nil {
+        err := sendData(&data.ResponseData{Neighbours: node.Neighbours})
+        if err != nil {
+            return
+        }
+    }
+
 }
 
 func (conn *Connection) InsertLink(link *runtime.Link, time time.Time) {
