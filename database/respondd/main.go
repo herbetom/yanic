@@ -78,8 +78,6 @@ func (conn *Connection) InsertNode(node *runtime.Node) {
 	}
 	err = writer.Flush()
 	if err != nil {
-
-		log.Errorf("[database-yanic] could not send: %s", res)
 		log.Errorf("[database-yanic] could not send: %s", err)
 	}
 }
