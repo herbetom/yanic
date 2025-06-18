@@ -55,7 +55,7 @@ func (conn *Connection) InsertNode(node *runtime.Node) {
 	res := &data.ResponseData{
 		Nodeinfo:   node.Nodeinfo,
 		Statistics: node.Statistics,
-		Neighbours: node.Neighbours,
+		// Neighbours: node.Neighbours,
 	}
 
 	writer := bufio.NewWriterSize(conn.conn, 8192)
