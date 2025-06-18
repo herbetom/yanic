@@ -55,7 +55,7 @@ func (conn *Connection) InsertNode(node *runtime.Node) {
 		Neighbours: node.Neighbours,
 	}
 
-	writer := bufio.NewWriterSize(conn.conn, 16384)
+	writer := bufio.NewWriterSize(conn.conn, 8192)
 
 	flater, err := flate.NewWriter(writer, flate.BestCompression)
 	if err != nil {
