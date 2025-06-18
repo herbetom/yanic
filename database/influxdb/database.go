@@ -5,7 +5,6 @@ import (
 	"sync"
 	"time"
 	"unicode"
-	"os"
 
 	"github.com/bdlm/log"
 	"github.com/influxdata/influxdb1-client/models"
@@ -52,16 +51,7 @@ func (c Config) Password() string {
 	// If the password_file option is set and not empty, read the password from the file
 	if val, ok := c["password_file"]; ok {
 		if val.(string) != "" {
-			// Expand environment variables in the password file path. This for example enables the use of systemd credentials
-			expandedPath := os.ExpandEnv(val.(string))
-
-			file, err := os.ReadFile(expandedPath)
-			if err != nil {
-				panic(err)
-			}
-
-			// Remove all leading and trailing white spaces from the password and return it
-			return strings.TrimSpace(string(file))
+			return LoadCredentialFromFile(val.(string))
 		}
 	}
 	if val, ok := c["password"]; ok {
